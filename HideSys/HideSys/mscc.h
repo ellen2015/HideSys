@@ -1,5 +1,5 @@
 #pragma once
-#include "ntddk.h"
+#include <ntddk.h>
 
 typedef enum _SYSTEM_INFORMATION_CLASS
 {
@@ -217,7 +217,7 @@ typedef enum _SYSTEM_INFORMATION_CLASS
 } SYSTEM_INFORMATION_CLASS;
 
 
-// µ¼³öµÄº¯Êı
+// å¯¼å‡ºçš„å‡½æ•°
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -274,7 +274,7 @@ typedef struct _KLDR_DATA_TABLE_ENTRY
 
 PLIST_ENTRY PsLoadedModuleList;
 
-// »ñµÃÖ¸¶¨Ä£¿éµÄ»ùÖ·ºÍ´óĞ¡
+// è·å¾—æŒ‡å®šæ¨¡å—çš„åŸºå€å’Œå¤§å°
 PVOID GetBaseAddress(
 	_In_opt_ CONST PCHAR pModuleName, 
 	_Out_opt_ PULONG pModuleSize) 
@@ -290,7 +290,7 @@ PVOID GetBaseAddress(
 	ULONG size = 0;
 	PRTL_PROCESS_MODULES pMods = NULL;
 
-	// »ñµÃÊı¾İµÄ´óĞ¡
+	// è·å¾—æ•°æ®çš„å¤§å°
 	status = ZwQuerySystemInformation(SystemModuleInformation, 0, size, &size);
 
 	if (0 == size)
@@ -298,24 +298,24 @@ PVOID GetBaseAddress(
 		DbgPrint("ZwQuerySystemInformation size error %s", __FUNCTION__);
 		return NULL;
 	}
-	// ÉêÇë¶ÔÓ¦´óĞ¡µÄÄÚ´æ¿Õ¼ä
+	// ç”³è¯·å¯¹åº”å¤§å°çš„å†…å­˜ç©ºé—´
 	pMods = (PRTL_PROCESS_MODULES)ExAllocatePoolWithTag(NonPagedPool, size, 'xxn');
 	if (!pMods)
 	{
 		return NULL;
 	}
 
-	// »ñµÃÊı¾İ
+	// è·å¾—æ•°æ®
 	status = ZwQuerySystemInformation(SystemModuleInformation, pMods, size, &size);
 
 	if (NT_SUCCESS(status))
 	{
 		
-		// ±éÀú
+		// éå†
 		for (ULONG i = 0; i < pMods->NumberOfModules; i++)
 		{
 			PRTL_PROCESS_MODULE_INFORMATION pModInfo = &pMods->Modules[i];
-			// ĞèÒª×¢ÒâµÄÊÇÄ£¿éµÄÃû×ÖµÄ»ñµÃ
+			// éœ€è¦æ³¨æ„çš„æ˜¯æ¨¡å—çš„åå­—çš„è·å¾—
 			if (!pModuleName || !_stricmp(pModuleName, (const char*)&pModInfo->FullPathName[pModInfo->OffsetToFileName]))
 			{
 				if (pModuleSize)
@@ -332,7 +332,7 @@ PVOID GetBaseAddress(
 }
 
 
-// ±éÀú¼ÓÔØµÄÄ£¿éµÄÃû×ÖºÍ»ùÖ·
+// éå†åŠ è½½çš„æ¨¡å—çš„åå­—å’ŒåŸºå€
 VOID 
 EnumLoadDriverName()
 {
@@ -340,7 +340,7 @@ EnumLoadDriverName()
 	ULONG size = 0;
 	PRTL_PROCESS_MODULES pMods = NULL;
 
-	// »ñµÃÊı¾İµÄ´óĞ¡
+	// è·å¾—æ•°æ®çš„å¤§å°
 	status = ZwQuerySystemInformation(SystemModuleInformation, 0, size, &size);
 
 	if (0 == size)
@@ -348,7 +348,7 @@ EnumLoadDriverName()
 		DbgPrint("ZwQuerySystemInformation size error %s", __FUNCTION__);
 		return;
 	}
-	// ÉêÇë¶ÔÓ¦´óĞ¡µÄÄÚ´æ¿Õ¼ä
+	// ç”³è¯·å¯¹åº”å¤§å°çš„å†…å­˜ç©ºé—´
 	pMods = (PRTL_PROCESS_MODULES)ExAllocatePoolWithTag(NonPagedPool, size, 'xxn');
 	if (!pMods)
 	{
@@ -356,23 +356,23 @@ EnumLoadDriverName()
 		return;
 	}
 
-	// »ñµÃÊı¾İ
+	// è·å¾—æ•°æ®
 	status = ZwQuerySystemInformation(SystemModuleInformation, pMods, size, &size);
 
 	if (NT_SUCCESS(status))
 	{
-		// DbgPrint("¿ªÊ¼±éÀú\n");
-		// ±éÀú
+		// DbgPrint("å¼€å§‹éå†\n");
+		// éå†
 		for (ULONG i = 0; i < pMods->NumberOfModules; i++)
 		{
 			// DbgBreakPoint();
 			PRTL_PROCESS_MODULE_INFORMATION pModInfo = &pMods->Modules[i];
 
 		
-			// ËÑË÷ÄÚºËµØÖ·¿Õ¼ä
+			// æœç´¢å†…æ ¸åœ°å€ç©ºé—´
 			if ((ULONGLONG)(pModInfo->ImageBase) > (ULONGLONG)0x8000000000000000)
 			{
-				// ĞèÒª×¢ÒâµÄÊÇÄ£¿éµÄÃû×ÖµÄ»ñµÃ
+				// éœ€è¦æ³¨æ„çš„æ˜¯æ¨¡å—çš„åå­—çš„è·å¾—
 				DbgPrint("Base address:	0x%llx	Driver name: %s\t\n", pModInfo->ImageBase, &pModInfo->FullPathName[pModInfo->OffsetToFileName]);
 			}
 			
@@ -387,7 +387,8 @@ EnumLoadDriverName()
 }
 
 
-// Òş²Ø×ÔÉíµÄÇı¶¯ ÕâÖÖÒş²Ø·½Ê½ÊÇ»á±»PcHunter¼ì²âµ½µÄ ¶Ô¿¹µÄÖ»ÊÇZwQuerySystemInformationº¯Êı
+// éšè—è‡ªèº«çš„é©±åŠ¨ è¿™ç§éšè—æ–¹å¼æ˜¯ä¼šè¢«PcHunteræ£€æµ‹åˆ°çš„ å¯¹æŠ—çš„åªæ˜¯ZwQuerySystemInformationå‡½æ•°
+// å¯åŠ¨çº¿ç¨‹æ³¨æ„è§‚å¯Ÿ
 NTSTATUS 
 HideDriver(
 	PDRIVER_OBJECT DriverObject, 
@@ -424,7 +425,7 @@ HideDriver(
 	return STATUS_SUCCESS;
 }
 
-// È«¾Ö±äÁ¿ PsLoadedModuleList µØÖ·µÄ»ñµÃ
+// å…¨å±€å˜é‡ PsLoadedModuleList åœ°å€çš„è·å¾—
 NTSTATUS
 InitLdrData(__in PDRIVER_OBJECT DriverObject)
 {
